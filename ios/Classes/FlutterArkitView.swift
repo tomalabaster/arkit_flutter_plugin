@@ -20,7 +20,7 @@ class FlutterArkitView: NSObject, FlutterPlatformView {
     
     func view() -> UIView { return sceneView }
     
-    func onMethodCalled(_ call :FlutterMethodCall, _ result:FlutterResult) {
+    func onMethodCalled(_ call :FlutterMethodCall, _ result:@escaping FlutterResult) {
         let arguments = call.arguments as? Dictionary<String, Any>
         
         if configuration == nil && call.method != "init" {
@@ -86,8 +86,7 @@ class FlutterArkitView: NSObject, FlutterPlatformView {
             onPointOfViewTransform(result)
             break
         case "playAnimation":
-            onPlayAnimation(arguments!)
-            result(nil)
+            onPlayAnimation(arguments!, result)
             break
         case "stopAnimation":
             onStopAnimation(arguments!)

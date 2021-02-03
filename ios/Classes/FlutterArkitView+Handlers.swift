@@ -188,7 +188,7 @@ extension FlutterArkitView {
         }
     }
     
-    func onPlayAnimation(_ arguments: Dictionary<String, Any>) {
+    func onPlayAnimation(_ arguments: Dictionary<String, Any>, _ result: @escaping FlutterResult) {
         guard let key = arguments["key"] as? String,
             let sceneName = arguments["sceneName"] as? String,
             let animationIdentifier = arguments["animationIdentifier"] as? String else {
@@ -196,12 +196,22 @@ extension FlutterArkitView {
                 return
         }
         
-        if let sceneUrl = Bundle.main.url(forResource: sceneName, withExtension: "dae"),
-            let sceneSource = SCNSceneSource(url: sceneUrl, options: nil),
+        
+        var referenceUrl: URL
+        if let bundleURL = Bundle.main.url(forResource: sceneName, withExtension: nil){
+            referenceUrl = bundleURL
+        } else {
+            referenceUrl = URL(fileURLWithPath: sceneName)
+        }
+        
+        if let sceneSource = SCNSceneSource(url: referenceUrl, options: nil),
             let animation = sceneSource.entryWithIdentifier(animationIdentifier, withClass: CAAnimation.self) {
             animation.repeatCount = 1
             animation.fadeInDuration = 1
             animation.fadeOutDuration = 0.5
+            animation.delegate = FlutterArkitAnimationDelegate({
+                result(true)
+            })
             sceneView.scene.rootNode.addAnimation(animation, forKey: key)
         } else {
             logPluginError("animation failed", toChannel: channel)
